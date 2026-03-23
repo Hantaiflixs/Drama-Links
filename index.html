@@ -14,12 +14,36 @@
       display: flex;
       flex-direction: column;
       background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                  url('https://i.ibb.co/vx7yLFwh/photo-2026-03-23-21-08-55-7620561070293254176.jpg'); /* এখানে ImgBB ডিরেক্ট লিঙ্ক দিন */
+                  url('https://i.ibb.co/vx7yLFwh/photo-2026-03-23-21-08-55-7620561070293254176.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       font-family: 'Inter', sans-serif;
       color: white;
+      overflow-x: hidden; /* মারকুই এর জন্য স্ক্রিন লক রাখা হয়েছে */
+    }
+
+    /* আধুনিক CSS মারকুই ডিজাইন */
+    .marquee-container {
+      background: rgba(220, 38, 38, 0.9);
+      color: #fcd34d;
+      padding: 10px 0;
+      font-size: 13px;
+      font-weight: bold;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .marquee-text {
+      display: inline-block;
+      padding-left: 100%;
+      animation: continuous-scroll 25s linear infinite;
+    }
+
+    @keyframes continuous-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
     }
 
     /* গ্লাস ইফেক্ট কার্ড */
@@ -41,7 +65,7 @@
     }
 
     .btn-action:hover {
-      background: #2563eb; /* Blue-600 */
+      background: #2563eb;
       transform: scale(1.05);
       border-color: #60a5fa;
       box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
@@ -52,24 +76,16 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-
-    .custom-marquee {
-      background: rgba(220, 38, 38, 0.9);
-      color: #fcd34d;
-      font-size: 13px;
-      font-weight: bold;
-      padding: 6px 0;
-    }
   </style>
 </head>
 <body>
 
-  <div class="custom-marquee">
-    <marquee behavior="scroll" direction="left" scrollamount="7">
-      🍿 আপনার পছন্দের যেকোনো <span style="color: #fcd34d;">Korean</span> অথবা <span style="color: #fcd34d;">Chinese</span> ড্রামা এবং মুভির জন্য আমাদের এখানে রিকোয়েস্ট করুন — 
-      <a href="https://t.me/+anI2lp863iYzODM1" class="underline hover:text-yellow-300">Contact Request Channel</a> 
-      | Luxe Drama তে মুভি লাভারদের স্বাগতম!
-    </marquee>
+  <div class="marquee-container">
+    <div class="marquee-text">
+      🍿 আপনার পছন্দের যেকোনো <span style="color: #ffffff;">Korean</span> অথবা <span style="color: #ffffff;">Chinese</span> ড্রামা এবং মুভির জন্য আমাদের এখানে রিকোয়েস্ট করুন — 
+      <a href="https://t.me/+anI2lp863iYzODM1" class="underline" style="color: #fcd34d;">Contact Request Channel</a> 
+      &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; Luxe Drama তে মুভি লাভারদের স্বাগতম! &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; 
+    </div>
   </div>
 
   <div class="flex-grow flex items-center justify-center px-4 py-10">
@@ -117,6 +133,7 @@
   <script>
     // সিকিউরিটি স্ক্রিপ্ট
     document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
     document.addEventListener('keydown', e => {
       if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'c')) {
         e.preventDefault();
