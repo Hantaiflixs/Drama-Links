@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxe Drama | Infinite Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { margin: 0; background: #000; color: white; font-family: 'Outfit', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+    #bg-blur { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(60px) brightness(0.2); z-index: -1; transition: 1s; }
+    .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 20px; margin-bottom: 25px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+    
+    /* Bottom Navigation */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 700; color: #888; text-decoration: none; transition: 0.3s; }
+    .nav-item.active { color: #3b82f6; }
+    
+    /* Admin Panel */
+    .admin-panel { display: none; background: #111; padding: 25px; border-radius: 20px; width: 95%; max-width: 600px; border: 1px solid #333; z-index: 200; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: 80vh; overflow-y: auto; }
+    .watch-btn { background: linear-gradient(90deg, #1e40af, #7e22ce); font-weight: 900; }
+    input, select { background: #1a1a1a !important; border: 1px solid #333 !important; color: white !important; padding: 10px; border-radius: 10px; width: 100%; margin-bottom: 10px; }
+  </style>
+</head>
+<body class="flex flex-col items-center p-4">
+
+  <div id="bg-blur"></div>
+
+  <div id="main-hub" class="w-full max-w-md space-y-6 pt-4">
+      </div>
+
+  <div class="opacity-10 text-[9px] py-10 cursor-pointer uppercase" onclick="showLogin()">Master Access</div>
+
+  <div class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <i data-lucide="home"></i>
+      <span>HOME</span>
+    </a>
+    <a href="https://t.me/+anI2lp863iYzODM1" class="nav-item">
+      <i data-lucide="send"></i>
+      <span>TELEGRAM</span>
+    </a>
+    <a href="#" onclick="showLogin()" class="nav-item">
+      <i data-lucide="user-cog"></i>
+      <span>ADMIN</span>
+    </a>
+  </div>
+
+  <div id="admin-login" class="admin-panel text-center">
+    <h2 class="text-xl font-bold mb-6 text-blue-500">ADMIN LOGIN</h2>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="handleLogin()" class="bg-blue-600 w-full py-4 rounded-xl font-bold">LOGIN</button>
+    <button onclick="location.reload()" class="mt-4 text-xs text-gray-500">CANCEL</button>
+  </div>
+
+  <div id="admin-dash" class="admin-panel">
+    <h2 class="text-xl font-bold mb-4 text-center text-green-500">MANAGE HUB</h2>
+    <div id="card-list" class="space-y-4">
+        </div>
+    <div class="flex gap-2 mt-6 sticky bottom-0 bg-[#111] pt-4">
+        <button onclick="addNewCardField()" class="bg-blue-600 flex-1 py-4 rounded-xl font-black">+ ADD NEW</button>
+        <button onclick="saveAllCards()" class="bg-green-600 flex-1 py-4 rounded-xl font-black">SAVE ALL</button>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = 'e6449037b5c9edb30f0e4b92c3789429';
+    let cardCount = 0;
+
+    function initHub() {
+      const savedCards = JSON.parse(localStorage.getItem('dramaHub')) || [{id: '136732', type: 'tv', hindi: true, msub: true}];
+      const hubContainer = document.getElementById('main-hub');
+      hubContainer.innerHTML = '';
+      
+      savedCards.forEach((card, index) => {
+        if(card.id) fetchCardData(card, index);
+      });
+      
+      // অ্যাডমিন প্যানেলে আগের কার্ডগুলো লোড করা
+      savedCards.forEach(card => addNewCardField(card));
+      lucide.createIcons();
+    }
+
+    async function fetchCardData(card, index) {
+      let url = `https://api.themoviedb.org/3/${card.type}/${card.id}?api_key=${API_KEY}&language=en-US`;
+      if(card.id.startsWith('tt')) url = `https://api.themoviedb.org/3/find/${card.id}?api_key=${API_KEY}&external_source=imdb_id&language=en-US`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        let final = card.id.startsWith('tt') ? (card.type === 'tv' ? data.tv_results[0] : data.movie_results[0]) : data;
+
+        if(!final) return;
+        if(index === 0) document.getElementById('bg-blur').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${final.backdrop_path})`;
+
+        const cardHTML = `
+          <div class="glass-card text-center">
+            <img src="https://image.tmdb.org/t/p/w500${final.poster_path}" class="w-40 h-56 mx-auto rounded-3xl mb-4 object-cover shadow-2xl">
+            <h2 class="text-xl font-black uppercase mb-1">${final.name || final.title}</h2>
+            <div class="flex justify-center gap-2 mb-3 items-center">
+               <span class="text-[10px] bg-yellow-500 text-black px-2 py-0.5 rounded font-black">⭐ ${final.vote_average.toFixed(1)}</span>
+               ${card.hindi ? '<span class="text-[10px] bg-red-600 px-2 py-0.5 rounded font-black uppercase">Hindi</span>' : ''}
+               ${card.msub ? '<span class="text-[10px] bg-blue-600 px-2 py-0.5 rounded font-black uppercase">MSub</span>' : ''}
+            </div>
+            <p class="text-gray-400 text-xs mb-5 line-clamp-2 px-2 italic">${final.overview || ""}</p>
+            <a href="https://t.me/queenlinksbot?start=req_LTEwMDI0ODgzMDI0NzU" class="watch-btn block w-full py-4 rounded-2xl text-md uppercase tracking-tighter text-white">🚀 Watch Now</a>
+          </div>
+        `;
+        document.getElementById('main-hub').innerHTML += cardHTML;
+      } catch(e) {}
+    }
+
+    // অ্যাডমিন প্যানেলে নতুন কার্ডের ঘর বাড়ানো
+    function addNewCardField(data = {id: '', type: 'tv', hindi: false, msub: false}) {
+      const list = document.getElementById('card-list');
+      const id = cardCount++;
+      const div = document.createElement('div');
+      div.className = "p-4 border border-white/5 bg-white/5 rounded-xl relative";
+      div.id = `field-${id}`;
+      div.innerHTML = `
+        <button onclick="removeField(${id})" class="absolute top-2 right-2 text-red-500 font-bold">X</button>
+        <div class="flex gap-2">
+            <input type="text" class="card-id" placeholder="TMDB/IMDB ID" value="${data.id}">
+            <select class="card-type w-1/4">
+                <option value="tv" ${data.type==='tv'?'selected':''}>TV</option>
+                <option value="movie" ${data.type==='movie'?'selected':''}>Movie</option>
+            </select>
+        </div>
+        <div class="flex gap-4">
+            <label class="text-[10px]"><input type="checkbox" class="card-hindi" ${data.hindi?'checked':''}> HINDI</label>
+            <label class="text-[10px]"><input type="checkbox" class="card-msub" ${data.msub?'checked':''}> MSUB/SUB</label>
+        </div>
+      `;
+      list.appendChild(div);
+    }
+
+    function removeField(id) { document.getElementById(`field-${id}`).remove(); }
+
+    function saveAllCards() {
+      const fields = document.querySelectorAll('#card-list > div');
+      const newCards = [];
+      fields.forEach(f => {
+        const id = f.querySelector('.card-id').value.trim();
+        if(id) {
+          newCards.push({
+            id: id,
+            type: f.querySelector('.card-type').value,
+            hindi: f.querySelector('.card-hindi').checked,
+            msub: f.querySelector('.card-msub').checked
+          });
+        }
+      });
+      localStorage.setItem('dramaHub', JSON.stringify(newCards));
+      alert('Hub Updated!');
+      location.reload();
+    }
+
+    function showLogin() { document.getElementById('admin-login').style.display = 'block'; }
+    function handleLogin() {
+      if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'admin123') {
+        document.getElementById('admin-login').style.display = 'none';
+        document.getElementById('admin-dash').style.display = 'block';
+      } else { alert('Wrong Access!'); }
+    }
+
+    initHub();
+  </script>
+</body>
+</html>
